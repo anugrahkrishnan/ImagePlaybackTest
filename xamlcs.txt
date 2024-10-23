@@ -1,0 +1,15 @@
+using System.Windows;
+
+namespace YourNamespace
+{
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+
+            // The DataContext is already set in the XAML file, but you can set it here if needed
+            // DataContext = new MainViewModel();
+        }
+    }
+}

@@ -1,0 +1,118 @@
+using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+
+namespace YourNamespace
+{
+    public class MainViewModel : INotifyPropertyChanged
+    {
+        private List<string> imagePaths = new List<string>();
+        private int currentImageIndex = 0;
+        private DispatcherTimer timer;
+        private BitmapImage currentImage;
+        private double speedMultiplier = 1;
+
+        public MainViewModel()
+        {
+            BrowseCommand = new RelayCommand(Browse);
+            PlayCommand = new RelayCommand(Play);
+
+            // Initialize the timer
+            timer = new DispatcherTimer();
+            timer.Tick += Timer_Tick;
+        }
+
+        public ICommand BrowseCommand { get; }
+        public ICommand PlayCommand { get; }
+
+        public BitmapImage CurrentImage
+        {
+            get => currentImage;
+            set
+            {
+                currentImage = value;
+                OnPropertyChanged(nameof(CurrentImage));
+            }
+        }
+
+        public double SpeedMultiplier
+        {
+            get => speedMultiplier;
+            set
+            {
+                speedMultiplier = value;
+                UpdateTimerInterval();
+                OnPropertyChanged(nameof(SpeedMultiplier));
+            }
+        }
+
+        private void Browse(object parameter)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Multiselect = true,
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string projectDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string newFolderPath = Path.Combine(projectDirectory, "CopiedImages");
+                Directory.CreateDirectory(newFolderPath);
+
+                imagePaths.Clear();
+
+                foreach (string filePath in openFileDialog.FileNames)
+                {
+                    string fileName = Path.GetFileName(filePath);
+                    string destinationPath = Path.Combine(newFolderPath, fileName);
+                    File.Copy(filePath, destinationPath, true);
+                    imagePaths.Add(destinationPath);
+                }
+
+                MessageBox.Show("Images copied successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void Play(object parameter)
+        {
+            if (imagePaths.Count == 0)
+            {
+                MessageBox.Show("No images to display. Please browse and select images first.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            currentImageIndex = 0;
+            UpdateTimerInterval();
+            timer.Start();
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            if (imagePaths.Count == 0) return;
+
+            string currentImagePath = imagePaths[currentImageIndex];
+            CurrentImage = new BitmapImage(new Uri(currentImagePath));
+
+            currentImageIndex = (currentImageIndex + 1) % imagePaths.Count;
+        }
+
+        private void UpdateTimerInterval()
+        {
+            timer.Interval = TimeSpan.FromSeconds(1.0 / SpeedMultiplier);
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+}
