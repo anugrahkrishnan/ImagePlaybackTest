@@ -1,0 +1,20 @@
+<Window x:Class="YourNamespace.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="450" Width="800">
+    <DockPanel>
+        <!-- Right DockPanel for buttons -->
+        <StackPanel DockPanel.Dock="Right" Width="150" VerticalAlignment="Top">
+            <Button Content="Browse" Margin="10" Click="BrowseButton_Click"/>
+            <Button Content="Play" Margin="10" Click="PlayButton_Click"/>
+        </StackPanel>
+
+        <!-- Main content area for Image and Slider -->
+        <Grid>
+            <Image x:Name="imageContainer" Stretch="Uniform" Margin="10"/>
+            <Slider x:Name="fpsSlider" VerticalAlignment="Bottom" Margin="10"
+                    Minimum="1" Maximum="5" TickFrequency="1"
+                    IsSnapToTickEnabled="True" ValueChanged="FpsSlider_ValueChanged"/>
+        </Grid>
+    </DockPanel>
+</Window>
